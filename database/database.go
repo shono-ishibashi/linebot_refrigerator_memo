@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"linebot/config"
+	"linebot/utils"
 	"log"
 )
 
@@ -25,6 +26,7 @@ func init() {
 	fmt.Println(dbConnectInfo)
 
 	Db, err = gorm.Open(config.Config.DbDriverName, dbConnectInfo)
+	Db.SetLogger(utils.Logger)
 
 	if err != nil {
 		log.Fatalln(err)
