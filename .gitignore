@@ -1,0 +1,4 @@
+dockerfiles/Dockerfile-prod
+build-deploy.sh
+config.ini
+.idea
