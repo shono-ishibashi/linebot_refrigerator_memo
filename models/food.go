@@ -39,7 +39,7 @@ func (food Food) DeleteFood() {
 }
 
 func FindFoodByUserIdAndStatus(foods *[]Food, UserId string, status string) {
-	database.Db.Where("user_id = ? AND status = ?", UserId, status).Find(&foods)
+	database.Db.Where("user_id = ? AND status = ?", UserId, status).Order("expiration_date").Find(&foods)
 }
 
 func FindFoodByFoodId(food *Food, foodId uint) {
