@@ -6,6 +6,7 @@ WORKDIR /go/src/app
 ADD ./ /go/src/app
 RUN apt update
 RUN apt install -y make bash gcc g++ tzdata vim git libpq-dev
-RUN cd /go/src/app && go get && go build main.go
+RUN cd /go/src/app && go get
+RUN go build main.go
 
 CMD ./main
