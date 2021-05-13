@@ -1,5 +1,19 @@
 version: '3'
 services:
+  web:
+    container_name: web
+    image: nginx:latest
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    volumes:
+      - /nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - web-api-network
+    restart: always
+
+
   api:
     container_name: api
     build:
@@ -7,6 +21,8 @@ services:
       dockerfile: ./dockerfiles/Dockerfile
     stdin_open: true
     tty: true
+    depends_on:
+      - db
     volumes:
       - ../:/go/src/app
     ports:
@@ -19,6 +35,7 @@ services:
       PORT: "8081"
     networks:
       - db-api-network
+      - web-api-network
 
 
   db:
@@ -41,3 +58,6 @@ services:
 networks:
   db-api-network:
     external: true
+  web-api-network:
+    external: true
+
