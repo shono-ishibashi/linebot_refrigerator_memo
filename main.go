@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
 	"linebot/config"
 	"linebot/controllers"
 	"linebot/database"
@@ -12,7 +11,7 @@ import (
 
 func main() {
 	database.Db.AutoMigrate(&models.Food{}, &models.User{})
-	router := mux.NewRouter()
-	router.HandleFunc("/linebot", controllers.LineHandler)
-	http.ListenAndServe(":"+config.Config.ServerPort, router)
+	http.HandleFunc("/linebot", controllers.LineHandler)
+	http.HandleFunc("/linebot/scheduler", controllers.SendMessageHandler)
+	http.ListenAndServe(":"+config.Config.ServerPort, nil)
 }

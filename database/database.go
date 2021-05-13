@@ -2,10 +2,9 @@ package database
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"linebot/config"
-	"linebot/utils"
 	"log"
 )
 
@@ -14,19 +13,15 @@ var Db *gorm.DB
 var err error
 
 func init() {
-	dbConnectInfo := fmt.Sprintf(
-		`postgres://%s:%s@%s:%s/%s`,
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=Asia/Tokyo",
+		config.Config.DbHost,
 		config.Config.DbUserName,
 		config.Config.DbUserPassword,
-		config.Config.DbHost,
-		config.Config.DbPort,
 		config.Config.DbName,
+		config.Config.DbPort,
 	)
 
-	fmt.Println(dbConnectInfo)
-
-	Db, err = gorm.Open(config.Config.DbDriverName, dbConnectInfo)
-	Db.SetLogger(utils.Logger)
+	Db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatalln(err)

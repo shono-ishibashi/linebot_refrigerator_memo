@@ -3,7 +3,9 @@ package line_utils
 import (
 	"fmt"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"linebot/config"
 	"linebot/models"
+	"log"
 	"strconv"
 	"time"
 )
@@ -246,4 +248,22 @@ func GenerateFoodsEatenRateTemplate(foodRate models.FoodRate) *linebot.BubbleCon
 		},
 	}
 	return container
+}
+
+var Bot *linebot.Client
+var err error
+
+func initBot() {
+	Bot, err = linebot.New(
+		config.Config.ChannelSecret,
+		config.Config.ChannelToken,
+	)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func init() {
+	initBot()
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/line/line-bot-sdk-go/linebot"
-	"linebot/config"
 	"linebot/line_utils"
 	"linebot/models"
 	"log"
@@ -15,16 +14,7 @@ import (
 )
 
 func LineHandler(w http.ResponseWriter, r *http.Request) {
-	bot, err := linebot.New(
-		config.Config.ChannelSecret,
-		config.Config.ChannelToken,
-	)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	events, err := bot.ParseRequest(r)
+	events, err := line_utils.Bot.ParseRequest(r)
 
 	if err != nil {
 		if err == linebot.ErrInvalidSignature {
@@ -44,22 +34,22 @@ func LineHandler(w http.ResponseWriter, r *http.Request) {
 
 				// reply food list in
 				if SentMessage == "list" {
-					replayFoodList(bot, event)
+					replayFoodList(line_utils.Bot, event)
 					return
 				}
 
 				if SentMessage == "rate" {
-					replyFoodsEatenRate(bot, event)
+					replyFoodsEatenRate(line_utils.Bot, event)
 					return
 				}
 
 				// reply add form
-				if _, err = bot.ReplyMessage(event.ReplyToken,
+				if _, err = line_utils.Bot.ReplyMessage(event.ReplyToken,
 					linebot.NewFlexMessage(SentMessage, line_utils.GenerateAddFoodConfirmationTemplate(SentMessage))).Do(); err != nil {
 					log.Fatalln(err)
 				}
 			default:
-				if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("商品名を入力してください")).Do(); err != nil {
+				if _, err = line_utils.Bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("商品名を入力してください")).Do(); err != nil {
 					log.Fatalln(err)
 				}
 			}
@@ -89,24 +79,22 @@ func LineHandler(w http.ResponseWriter, r *http.Request) {
 					Status:         models.InStockStatus,
 					UserId:         event.Source.UserID,
 				}
-				addFood(bot, event, &food)
+				addFood(line_utils.Bot, event, &food)
 			case "detail":
 				foodId := convertStringToUint(param["foodId"].(string))
-				replyFoodDetail(bot, event, foodId)
+				replyFoodDetail(line_utils.Bot, event, foodId)
 			case "eat":
 				foodId := convertStringToUint(param["foodId"].(string))
-				replyEatFood(bot, event, foodId)
+				replyEatFood(line_utils.Bot, event, foodId)
 			case "discarded":
 				foodId := convertStringToUint(param["foodId"].(string))
-				replyDiscardFood(bot, event, foodId)
+				replyDiscardFood(line_utils.Bot, event, foodId)
 			case "delete":
 				foodId := convertStringToUint(param["foodId"].(string))
-				replyDeleteFood(bot, event, foodId)
+				replyDeleteFood(line_utils.Bot, event, foodId)
 			}
-
 		}
 	}
-
 }
 
 func addFood(bot *linebot.Client, event *linebot.Event, food *models.Food) {
