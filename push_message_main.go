@@ -1,14 +1,17 @@
-package controllers
+package main
 
 import (
 	"fmt"
 	"github.com/line/line-bot-sdk-go/linebot"
 	"linebot/line_utils"
 	"linebot/models"
-	"net/http"
 )
 
-func SendMessageHandler(w http.ResponseWriter, _ *http.Request) {
+func main() {
+	SendMessageHandler()
+}
+
+func SendMessageHandler() {
 	var userIds []string
 	models.FindUserIdByExpirationDate(&userIds)
 
@@ -29,8 +32,6 @@ func SendMessageHandler(w http.ResponseWriter, _ *http.Request) {
 
 		line_utils.Bot.PushMessage(userId, linebot.NewTextMessage(message)).Do()
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func generateFoodMessageFormat(food models.Food) string {
