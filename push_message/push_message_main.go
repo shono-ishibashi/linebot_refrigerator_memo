@@ -6,12 +6,18 @@ import (
 	"github.com/robfig/cron/v3"
 	"linebot/line_utils"
 	"linebot/models"
+	"net/http"
 )
 
 func main() {
 	c := cron.New()
 	c.AddFunc("@every 5s", SendMessageHandler)
 	c.Start()
+
+	http.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {})
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		fmt.Printf(err.Error())
+	}
 }
 
 func SendMessageHandler() {
