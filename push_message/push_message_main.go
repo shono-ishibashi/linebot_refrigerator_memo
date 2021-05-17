@@ -11,12 +11,12 @@ import (
 
 func main() {
 	c := cron.New()
-	c.AddFunc("@every 5s", SendMessageHandler)
+	c.AddFunc("15 13 * * * *", SendExpirationDateMessageHandler)
 	c.Start()
 	runtime.Goexit()
 }
 
-func SendMessageHandler() {
+func SendExpirationDateMessageHandler() {
 	var userIds []string
 	models.FindUserIdByExpirationDate(&userIds)
 
@@ -29,7 +29,7 @@ func SendMessageHandler() {
 		}
 		message := "期限が近い食品があります"
 		for _, food := range foods {
-			message += "\n" + generateFoodMessageFormat(food)
+			message += "\n" + generateExpirationDateMessageFormat(food)
 		}
 
 		fmt.Println(userIds)
@@ -39,7 +39,7 @@ func SendMessageHandler() {
 	}
 }
 
-func generateFoodMessageFormat(food models.Food) string {
+func generateExpirationDateMessageFormat(food models.Food) string {
 	stringDate := food.ExpirationDate.Format(line_utils.DateFormat)
 	message := fmt.Sprintf("%s : %s", food.Name, stringDate)
 	return message
