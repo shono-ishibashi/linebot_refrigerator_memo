@@ -3,12 +3,15 @@ package main
 import (
 	"fmt"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/robfig/cron/v3"
 	"linebot/line_utils"
 	"linebot/models"
 )
 
 func main() {
-	SendMessageHandler()
+	c := cron.New()
+	c.AddFunc("@every 5s", SendMessageHandler)
+	c.Start()
 }
 
 func SendMessageHandler() {

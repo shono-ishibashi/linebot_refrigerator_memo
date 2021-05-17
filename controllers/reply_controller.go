@@ -132,8 +132,11 @@ func replyFoodDetail(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	var food models.Food
 	models.FindFoodByFoodId(&food, foodId)
 	replayFlex := line_utils.GenerateDetailTemplate(food)
+	if food.ID == 0 {
+		replyNotFoundMessage(bot, event)
+		return
+	}
 	_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage(food.Name, replayFlex)).Do()
-
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -142,6 +145,10 @@ func replyFoodDetail(bot *linebot.Client, event *linebot.Event, foodId uint) {
 func replyEatFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	var food models.Food
 	models.FindFoodByFoodId(&food, foodId)
+	if food.ID == 0 {
+		replyNotFoundMessage(bot, event)
+		return
+	}
 	food.Status = models.AteStatus
 	food.UpdateFood()
 	replyMessage := fmt.Sprintf("「%s」をから冷蔵庫から食べました！", food.Name)
@@ -155,6 +162,10 @@ func replyEatFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 func replyDiscardFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	var food models.Food
 	models.FindFoodByFoodId(&food, foodId)
+	if food.ID == 0 {
+		replyNotFoundMessage(bot, event)
+		return
+	}
 	food.Status = models.DiscardedStatus
 	food.UpdateFood()
 	replyMessage := fmt.Sprintf("「%s」を破棄しました、、、。", food.Name)
@@ -167,6 +178,10 @@ func replyDiscardFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 func replyDeleteFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	var food models.Food
 	models.FindFoodByFoodId(&food, foodId)
+	if food.ID == 0 {
+		replyNotFoundMessage(bot, event)
+		return
+	}
 	food.DeleteFood()
 	replyMessage := fmt.Sprintf("「%s」を削除しました。", food.Name)
 	_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
@@ -204,4 +219,13 @@ func convertStringToUint(s string) uint {
 		log.Fatalln(err)
 	}
 	return uint(value)
+}
+
+func replyNotFoundMessage(bot *linebot.Client, event *linebot.Event) {
+	notFoundMessage := "指定の食品は存在しません"
+	_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(notFoundMessage)).Do()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return
 }

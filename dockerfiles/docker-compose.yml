@@ -34,6 +34,9 @@ services:
       POSTGRES_DB: "linebot"
       DB_HOSTNAME: "linebot_db"
       PORT: "8081"
+      CHANNEL_SECRET: "line channel secret"
+      CHANNEL_TOKEN: "line channel token"
+
     networks:
       - db-api-network
       - web-api-network
