@@ -11,10 +11,9 @@ import (
 
 func main() {
 	c := cron.New()
-	c.AddFunc("*/1 * * * * *", func() { fmt.Println("hahaha") })
+	c.AddFunc("@every 5s", SendMessageHandler)
 	c.Start()
 	runtime.Goexit()
-
 }
 
 func SendMessageHandler() {
