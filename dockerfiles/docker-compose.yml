@@ -36,6 +36,7 @@ services:
       PORT: "8081"
       CHANNEL_SECRET: "line channel secret"
       CHANNEL_TOKEN: "line channel token"
+      TZ: "Asia/Tokyo"
 
     networks:
       - db-api-network
@@ -51,7 +52,7 @@ services:
       POSTGRES_PASSWORD: "linebot_password"
       POSTGRES_DB: "linebot"
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
-      TZ: 'Asia/Tokyo'
+      TZ: "Asia/Tokyo"
     volumes:
       - ./postgres/init:/docker-entrypoint-initdb.d
     ports:
