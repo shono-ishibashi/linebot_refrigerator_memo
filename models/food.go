@@ -57,12 +57,16 @@ func FindRate(foodRate *FoodRate, UserId string) {
 	database.Db.Raw(query, AteStatus, DiscardedStatus, UserId).Scan(foodRate)
 }
 
-// FindUserIdByExpirationDate 期限が2日以内の食品を持つUserIdを検索する。
-func FindUserIdByExpirationDate(UserIds *[]string) {
-	database.Db.Model(&Food{}).Distinct().Where("expiration_date - interval '1day' <=  current_date AND status = ?", InStockStatus).Pluck("UserId", UserIds)
+// FindUserIds 期限が2日以内の食品を持つUserIdを検索する。
+func FindUserIds(UserIds *[]string) {
+	database.Db.Model(&Food{}).Distinct().Pluck("UserId", UserIds)
 }
 
 // FindFoodsByUserIdAndExpirationDate 期限が2日以内の食品をUserIdで検索する。
 func FindFoodsByUserIdAndExpirationDate(foods *[]Food, UserId string) {
 	database.Db.Where("user_id = ? AND expiration_date - interval '1day' <=  current_date AND expiration_date >=  current_date AND status = ? ", UserId, InStockStatus).Find(foods)
+}
+
+func FindExpiredFood(foods *[]Food, UserId string) {
+	database.Db.Where("user_id = ? AND expiration_date < current_date AND status = ?", UserId, InStockStatus).Find(foods)
 }

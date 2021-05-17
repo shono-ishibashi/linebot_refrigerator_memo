@@ -11,32 +11,56 @@ import (
 
 func main() {
 	c := cron.New()
-	c.AddFunc("15 13 * * * *", SendExpirationDateMessageHandler)
+	_, err := c.AddFunc("0 8 * * *", SendMessage)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	c.Start()
 	runtime.Goexit()
 }
 
-func SendExpirationDateMessageHandler() {
+func SendMessage() {
 	var userIds []string
-	models.FindUserIdByExpirationDate(&userIds)
+	models.FindUserIds(&userIds)
 
 	for _, userId := range userIds {
-		var foods []models.Food
-		models.FindFoodsByUserIdAndExpirationDate(&foods, userId)
-
-		if len(foods) == 0 {
-			return
-		}
-		message := "期限が近い食品があります"
-		for _, food := range foods {
-			message += "\n" + generateExpirationDateMessageFormat(food)
-		}
-
-		fmt.Println(userIds)
-		fmt.Println(message)
-
-		line_utils.Bot.PushMessage(userId, linebot.NewTextMessage(message)).Do()
+		sendExpirationDateMessage(userId)
+		sendExpiredFoodMessage(userId)
 	}
+
+}
+
+func sendExpirationDateMessage(userId string) {
+	var foods []models.Food
+	models.FindFoodsByUserIdAndExpirationDate(&foods, userId)
+
+	if len(foods) == 0 {
+		return
+	}
+	message := "期限が近い食品があります"
+	for _, food := range foods {
+		message += "\n" + generateExpirationDateMessageFormat(food)
+	}
+
+	line_utils.Bot.PushMessage(userId, linebot.NewTextMessage(message)).Do()
+}
+
+func sendExpiredFoodMessage(userId string) {
+	var foods []models.Food
+	models.FindExpiredFood(&foods, userId)
+
+	if len(foods) == 0 {
+		return
+	}
+	message := "期限切れの食品があります"
+	for _, food := range foods {
+		message += "\n" + generateExpirationDateMessageFormat(food)
+	}
+
+	line_utils.Bot.PushMessage(userId, linebot.NewTextMessage(message)).Do()
+
 }
 
 func generateExpirationDateMessageFormat(food models.Food) string {
