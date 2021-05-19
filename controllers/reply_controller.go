@@ -237,6 +237,7 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
 		}
 		carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
 		_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
+		fmt.Println(carouselMessage.MarshalJSON())
 		if err != nil {
 			log.Fatalln(err)
 		}
