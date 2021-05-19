@@ -270,6 +270,7 @@ func fetchRecipe(foodName string) ([][]recipe.Recipe, error) {
 
 	searchedCategoryList := recipe.SearchCategoryByFoodName(foodName, categoryList)
 	fmt.Println("========================")
+	fmt.Println(len(categoryList))
 	fmt.Println(searchedCategoryList)
 	fmt.Println("========================")
 	if len(searchedCategoryList) == 0 {
