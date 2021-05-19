@@ -222,10 +222,16 @@ func replyFoodsEatenRate(bot *linebot.Client, event *linebot.Event) {
 func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
 	var foods []models.Food
 	models.FindFoodsByUserIdAndExpirationDate(&foods, userId)
+	categoryList, fetchCategoryListErr := recipe.FetchCategoryList()
+
+	if fetchCategoryListErr != nil {
+		log.Fatalln(fetchCategoryListErr)
+	}
 
 	for _, food := range foods {
 		// TODO: add err handling
-		recipeListList, _ := fetchRecipe(food.Name)
+
+		recipeListList, _ := fetchRecipe(food.Name, categoryList)
 		for _, recipeList := range recipeListList {
 			var recipeBublleList []*linebot.BubbleContainer
 			for _, recipe := range recipeList {
@@ -258,11 +264,7 @@ func replyNotFoundMessage(bot *linebot.Client, event *linebot.Event) {
 	return
 }
 
-func fetchRecipe(foodName string) ([][]recipe.Recipe, error) {
-	categoryList, fetchCategoryListErr := recipe.FetchCategoryList()
-	if fetchCategoryListErr != nil {
-		log.Fatalln(fetchCategoryListErr)
-	}
+func fetchRecipe(foodName string, categoryList []recipe.Category) ([][]recipe.Recipe, error) {
 
 	fmt.Println("========================")
 	fmt.Println(foodName)
