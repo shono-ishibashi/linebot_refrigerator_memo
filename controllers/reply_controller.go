@@ -279,6 +279,9 @@ func fetchRecipe(foodName string, categoryList []recipe.Category) ([][]recipe.Re
 	if len(searchedCategoryList) == 0 {
 		log.Println("no result")
 	}
+	fmt.Println("====================")
+	fmt.Println(searchedCategoryList)
+	fmt.Println("====================")
 
 	var recipeListList [][]recipe.Recipe
 	for _, searchedCategory := range searchedCategoryList {
@@ -289,9 +292,6 @@ func fetchRecipe(foodName string, categoryList []recipe.Category) ([][]recipe.Re
 
 		recipeListList = append(recipeListList, recipeList)
 	}
-	fmt.Println("====================")
-	fmt.Println(recipeListList)
-	fmt.Println("====================")
 
 	return recipeListList, nil
 }
