@@ -154,11 +154,20 @@ func GenerateDetailTemplate(food models.Food) *linebot.BubbleContainer {
 		},
 	}
 
+	recipeButtonComponent := &linebot.ButtonComponent{
+		Type: linebot.FlexComponentTypeButton,
+		Action: &linebot.PostbackAction{
+			Data:  fmt.Sprintf("{\"type\": \"%s\", \"foodId\":\"%d\"}", "recipe", food.ID),
+			Label: "レシピを検索する",
+		},
+	}
+
 	containerContents := []linebot.FlexComponent{
 		titleComponent,
 		eatButtonComponent,
 		discardButtonComponent,
 		deleteButtonComponent,
+		recipeButtonComponent,
 	}
 
 	container := &linebot.BubbleContainer{

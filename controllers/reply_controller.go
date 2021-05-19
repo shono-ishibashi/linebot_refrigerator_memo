@@ -44,11 +44,6 @@ func LineHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				if SentMessage == "recipe" {
-					replyRecipe(line_utils.Bot, event, event.Source.UserID)
-					return
-				}
-
 				// reply add form
 				if _, err = line_utils.Bot.ReplyMessage(event.ReplyToken,
 					linebot.NewFlexMessage(SentMessage, line_utils.GenerateAddFoodConfirmationTemplate(SentMessage))).Do(); err != nil {
@@ -100,7 +95,7 @@ func LineHandler(w http.ResponseWriter, r *http.Request) {
 				replyDeleteFood(line_utils.Bot, event, foodId)
 			case "recipe":
 				foodId := convertStringToUint(param["foodId"].(string))
-				replyRecipe(line_utils.Bot, event)
+				replyRecipe(line_utils.Bot, event, foodId)
 			}
 		}
 	}
