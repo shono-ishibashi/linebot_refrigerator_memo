@@ -232,7 +232,10 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
 				recipeBublleList = append(recipeBublleList, line_utils.GenerateRecipeTemplate(recipe))
 			}
 			carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
-			bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
+			_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}
 	}
 
