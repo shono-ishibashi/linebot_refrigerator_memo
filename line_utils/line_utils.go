@@ -271,7 +271,7 @@ func GenerateRecipeTemplate(recipe racipe.Recipe) *linebot.BubbleContainer {
 		Contents: []linebot.FlexComponent{
 			&linebot.TextComponent{
 				Type:   linebot.FlexComponentTypeText,
-				Text:   "食べた割合",
+				Text:   recipe.RecipeTitle,
 				Weight: linebot.FlexTextWeightTypeBold,
 				Align:  linebot.FlexComponentAlignTypeStart,
 				Size:   linebot.FlexTextSizeTypeXl,
