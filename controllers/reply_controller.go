@@ -283,7 +283,9 @@ func fetchRecipe(foodName string, categoryList []recipe.Category) ([][]recipe.Re
 
 		recipeListList = append(recipeListList, recipeList)
 	}
+	fmt.Println("====================")
 	fmt.Println(recipeListList)
+	fmt.Println("====================")
 
 	return recipeListList, nil
 }
