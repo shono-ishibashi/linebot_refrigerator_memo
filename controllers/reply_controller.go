@@ -229,7 +229,10 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
 	}
 
 	// TODO: add err handling
-	recipeListList, _ := fetchRecipe("鮭", categoryList)
+	recipeListList, err := fetchRecipe("鮭", categoryList)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	for _, recipeList := range recipeListList {
 		var recipeBublleList []*linebot.BubbleContainer
 		fmt.Println("====================")
