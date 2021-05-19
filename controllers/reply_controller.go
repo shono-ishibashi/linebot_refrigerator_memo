@@ -230,6 +230,9 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
 
 	// TODO: add err handling
 	recipeListList, err := fetchRecipe("鮭", categoryList)
+	fmt.Println("====================")
+	fmt.Println(len(recipeListList))
+	fmt.Println("====================")
 	if err != nil {
 		log.Fatalln(err)
 	}
