@@ -286,6 +286,7 @@ func fetchRecipe(foodName string) ([][]recipe.Recipe, error) {
 
 		recipeListList = append(recipeListList, recipeList)
 	}
+	fmt.Println(recipeListList)
 
 	return recipeListList, nil
 }
