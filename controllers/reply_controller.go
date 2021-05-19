@@ -232,9 +232,15 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
 	recipeListList, _ := fetchRecipe("鮭", categoryList)
 	for _, recipeList := range recipeListList {
 		var recipeBublleList []*linebot.BubbleContainer
+		fmt.Println("====================")
+		fmt.Println(len(recipeBublleList))
+		fmt.Println("====================")
 		for _, recipe := range recipeList {
 			recipeBublleList = append(recipeBublleList, line_utils.GenerateRecipeTemplate(recipe))
 		}
+		fmt.Println("====================")
+		fmt.Println(len(recipeBublleList))
+		fmt.Println("====================")
 		carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
 		fmt.Println(carouselMessage)
 		_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
@@ -263,16 +269,7 @@ func replyNotFoundMessage(bot *linebot.Client, event *linebot.Event) {
 }
 
 func fetchRecipe(foodName string, categoryList []recipe.Category) ([][]recipe.Recipe, error) {
-
-	fmt.Println("========================")
-	fmt.Println(foodName)
-	fmt.Println("========================")
-
 	searchedCategoryList := recipe.SearchCategoryByFoodName(foodName, categoryList)
-	fmt.Println("========================")
-	fmt.Println(len(categoryList))
-	fmt.Println(searchedCategoryList)
-	fmt.Println("========================")
 	if len(searchedCategoryList) == 0 {
 		log.Println("no result")
 	}
