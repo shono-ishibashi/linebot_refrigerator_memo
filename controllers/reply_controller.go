@@ -283,7 +283,7 @@ func fetchRecipe(foodName string, categoryList []recipe.Category) ([][]recipe.Re
 	var recipeListList [][]recipe.Recipe
 	for _, searchedCategory := range searchedCategoryList {
 		recipeList, searchRecipeErr := recipe.SearchRecipeByCategoryId(searchedCategory.CategoryId)
-		if searchedCategoryList != nil {
+		if searchRecipeErr != nil {
 			return nil, searchRecipeErr
 		}
 
