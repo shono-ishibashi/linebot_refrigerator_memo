@@ -228,20 +228,17 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
 		log.Fatalln(fetchCategoryListErr)
 	}
 
-	for _, food := range foods {
-		// TODO: add err handling
-
-		recipeListList, _ := fetchRecipe(food.Name, categoryList)
-		for _, recipeList := range recipeListList {
-			var recipeBublleList []*linebot.BubbleContainer
-			for _, recipe := range recipeList {
-				recipeBublleList = append(recipeBublleList, line_utils.GenerateRecipeTemplate(recipe))
-			}
-			carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
-			_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
-			if err != nil {
-				log.Fatalln(err)
-			}
+	// TODO: add err handling
+	recipeListList, _ := fetchRecipe("鮭", categoryList)
+	for _, recipeList := range recipeListList {
+		var recipeBublleList []*linebot.BubbleContainer
+		for _, recipe := range recipeList {
+			recipeBublleList = append(recipeBublleList, line_utils.GenerateRecipeTemplate(recipe))
+		}
+		carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
+		_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
+		if err != nil {
+			log.Fatalln(err)
 		}
 	}
 
