@@ -6,6 +6,7 @@ import (
 	"github.com/line/line-bot-sdk-go/linebot"
 	"linebot/line_utils"
 	"linebot/models"
+	"linebot/recipe"
 	"log"
 	"math"
 	"net/http"
@@ -40,6 +41,11 @@ func LineHandler(w http.ResponseWriter, r *http.Request) {
 
 				if SentMessage == "rate" {
 					replyFoodsEatenRate(line_utils.Bot, event)
+					return
+				}
+
+				if SentMessage == "recipe" {
+					replyRecipe(line_utils.Bot, event, event.Source.UserID)
 					return
 				}
 
@@ -213,6 +219,25 @@ func replyFoodsEatenRate(bot *linebot.Client, event *linebot.Event) {
 	}
 }
 
+func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
+	var foods []models.Food
+	models.FindFoodsByUserIdAndExpirationDate(&foods, userId)
+
+	for _, food := range foods {
+		// TODO: add err handling
+		recipeListList, _ := fetchRecipe(food.Name)
+		for _, recipeList := range recipeListList {
+			var recipeBublleList []*linebot.BubbleContainer
+			for _, recipe := range recipeList {
+				recipeBublleList = append(recipeBublleList, line_utils.GenerateRecipeTemplate(recipe))
+			}
+			carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
+			bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
+		}
+	}
+
+}
+
 func convertStringToUint(s string) uint {
 	value, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
@@ -228,4 +253,28 @@ func replyNotFoundMessage(bot *linebot.Client, event *linebot.Event) {
 		log.Fatalln(err)
 	}
 	return
+}
+
+func fetchRecipe(foodName string) ([][]recipe.Recipe, error) {
+	categoryList, fetchCategoryListErr := recipe.FetchCategoryList()
+	if fetchCategoryListErr != nil {
+		log.Fatalln(fetchCategoryListErr)
+	}
+
+	searchedCategoryList := recipe.SearchCategoryByFoodName(foodName, categoryList)
+	if len(searchedCategoryList) == 0 {
+		log.Println("no result")
+	}
+
+	var recipeListList [][]recipe.Recipe
+	for _, searchedCategory := range searchedCategoryList {
+		recipeList, searchRecipeErr := recipe.SearchRecipeByCategoryId(searchedCategory.CategoryId)
+		if searchedCategoryList != nil {
+			return nil, searchRecipeErr
+		}
+
+		recipeListList = append(recipeListList, recipeList)
+	}
+
+	return recipeListList, nil
 }
