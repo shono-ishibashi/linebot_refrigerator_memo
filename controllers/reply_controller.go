@@ -155,7 +155,7 @@ func replyEatFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	}
 	food.Status = models.AteStatus
 	food.UpdateFood()
-	replyMessage := fmt.Sprintf("「%s」をから冷蔵庫から食べました！", food.Name)
+	replyMessage := fmt.Sprintf("「%s」をLINE冷蔵庫から食べました！", food.Name)
 	_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 
 	if err != nil {
@@ -238,12 +238,13 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, foodId uint) {
 		}
 		carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
 		fmt.Println(carouselMessage)
-		_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
+		_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage(food.Name+"のレシピ", carouselMessage)).Do()
 		if err != nil {
 			log.Fatalln(err)
 		}
+	} else {
+		bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("レシピは見つかりませんでした。")).Do()
 	}
-
 }
 
 func convertStringToUint(s string) uint {
