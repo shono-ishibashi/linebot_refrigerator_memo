@@ -98,6 +98,9 @@ func LineHandler(w http.ResponseWriter, r *http.Request) {
 			case "delete":
 				foodId := convertStringToUint(param["foodId"].(string))
 				replyDeleteFood(line_utils.Bot, event, foodId)
+			case "recipe":
+				foodId := convertStringToUint(param["foodId"].(string))
+				replyRecipe(line_utils.Bot, event)
 			}
 		}
 	}
@@ -219,9 +222,9 @@ func replyFoodsEatenRate(bot *linebot.Client, event *linebot.Event) {
 	}
 }
 
-func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
-	var foods []models.Food
-	models.FindFoodsByUserIdAndExpirationDate(&foods, userId)
+func replyRecipe(bot *linebot.Client, event *linebot.Event, foodId uint) {
+	var food models.Food
+	models.FindFoodByFoodId(&food, foodId)
 	categoryList, fetchCategoryListErr := recipe.FetchCategoryList()
 
 	if fetchCategoryListErr != nil {
@@ -229,24 +232,15 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, userId string) {
 	}
 
 	// TODO: add err handling
-	recipeListList, err := fetchRecipe("鮭", categoryList)
-	fmt.Println("====================")
-	fmt.Println(len(recipeListList))
-	fmt.Println("====================")
+	recipeListList, err := fetchRecipe(food.Name, categoryList)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	for _, recipeList := range recipeListList {
 		var recipeBublleList []*linebot.BubbleContainer
-		fmt.Println("====================")
-		fmt.Println(len(recipeBublleList))
-		fmt.Println("====================")
 		for _, recipe := range recipeList {
 			recipeBublleList = append(recipeBublleList, line_utils.GenerateRecipeTemplate(recipe))
 		}
-		fmt.Println("====================")
-		fmt.Println(len(recipeBublleList))
-		fmt.Println("====================")
 		carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
 		fmt.Println(carouselMessage)
 		_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage("test", carouselMessage)).Do()
