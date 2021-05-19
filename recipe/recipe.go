@@ -67,8 +67,6 @@ func FetchCategoryList() ([]Category, error) {
 		categoryUrlRemovedDomain := strings.Replace(category.CategoryUrl, "https://recipe.rakuten.co.jp/category/", "", 1)
 		categoryList[index].CategoryId = categoryUrlRemovedDomain[:utf8.RuneCount([]byte(categoryUrlRemovedDomain))-1]
 	}
-	fmt.Println(resBody.Result.Small)
-
 	return categoryList, nil
 }
 
