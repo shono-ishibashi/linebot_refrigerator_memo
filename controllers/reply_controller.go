@@ -231,9 +231,9 @@ func replyRecipe(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	for _, recipeList := range recipeListList {
+	if len(recipeListList) != 0 {
 		var recipeBublleList []*linebot.BubbleContainer
-		for _, recipe := range recipeList {
+		for _, recipe := range recipeListList[0] {
 			recipeBublleList = append(recipeBublleList, line_utils.GenerateRecipeTemplate(recipe))
 		}
 		carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
