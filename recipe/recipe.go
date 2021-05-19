@@ -90,6 +90,7 @@ func SearchRecipeByCategoryId(categoryId string) ([]Recipe, error) {
 	}
 
 	body, ioutilReadAllErr := ioutil.ReadAll(res.Body)
+	fmt.Println(string(body))
 	if ioutilReadAllErr != nil {
 		return nil, ioutilReadAllErr
 	}
