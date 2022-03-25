@@ -12,6 +12,5 @@ import (
 func main() {
 	database.Db.AutoMigrate(&models.Food{}, &models.User{})
 	http.HandleFunc("/linebot", controllers.LineHandler)
-	http.HandleFunc("/linebot/scheduler", controllers.SendMessageHandler)
 	http.ListenAndServe(":"+config.Config.ServerPort, nil)
 }

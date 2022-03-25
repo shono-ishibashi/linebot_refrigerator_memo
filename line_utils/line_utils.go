@@ -5,6 +5,7 @@ import (
 	"github.com/line/line-bot-sdk-go/linebot"
 	"linebot/config"
 	"linebot/models"
+	racipe "linebot/recipe"
 	"log"
 	"strconv"
 	"time"
@@ -153,11 +154,20 @@ func GenerateDetailTemplate(food models.Food) *linebot.BubbleContainer {
 		},
 	}
 
+	recipeButtonComponent := &linebot.ButtonComponent{
+		Type: linebot.FlexComponentTypeButton,
+		Action: &linebot.PostbackAction{
+			Data:  fmt.Sprintf("{\"type\": \"%s\", \"foodId\":\"%d\"}", "recipe", food.ID),
+			Label: "レシピを検索する",
+		},
+	}
+
 	containerContents := []linebot.FlexComponent{
 		titleComponent,
 		eatButtonComponent,
 		discardButtonComponent,
 		deleteButtonComponent,
+		recipeButtonComponent,
 	}
 
 	container := &linebot.BubbleContainer{
@@ -248,6 +258,134 @@ func GenerateFoodsEatenRateTemplate(foodRate models.FoodRate) *linebot.BubbleCon
 		},
 	}
 	return container
+}
+
+func GenerateRecipeTemplate(recipe racipe.Recipe) *linebot.BubbleContainer {
+
+	imageComponet := &linebot.ImageComponent{
+		Type:        linebot.FlexComponentTypeImage,
+		URL:         recipe.FoodImageUrl,
+		Size:        linebot.FlexImageSizeTypeFull,
+		AspectRatio: "20:13",
+		AspectMode:  linebot.FlexImageAspectModeTypeCover,
+		Action: &linebot.URIAction{
+			URI:   recipe.RecipeUrl,
+			Label: "action",
+		},
+	}
+
+	titleComponent := &linebot.BoxComponent{
+		Type:   linebot.FlexComponentTypeBox,
+		Layout: linebot.FlexBoxLayoutTypeVertical,
+		Contents: []linebot.FlexComponent{
+			&linebot.TextComponent{
+				Type:   linebot.FlexComponentTypeText,
+				Text:   recipe.RecipeTitle,
+				Weight: linebot.FlexTextWeightTypeBold,
+				Align:  linebot.FlexComponentAlignTypeStart,
+				Size:   linebot.FlexTextSizeTypeXl,
+			},
+		},
+	}
+
+	contentComponent := &linebot.BoxComponent{
+		Type:    linebot.FlexComponentTypeBox,
+		Layout:  linebot.FlexBoxLayoutTypeVertical,
+		Spacing: linebot.FlexComponentSpacingTypeSm,
+		Contents: []linebot.FlexComponent{
+			// 調理時間コンポーネント
+			&linebot.BoxComponent{
+				Type:   linebot.FlexComponentTypeBox,
+				Layout: linebot.FlexBoxLayoutTypeBaseline,
+				Contents: []linebot.FlexComponent{
+					&linebot.TextComponent{
+						Type:   linebot.FlexComponentTypeText,
+						Weight: linebot.FlexTextWeightTypeBold,
+						Margin: linebot.FlexComponentMarginTypeSm,
+						Text:   "調理時間",
+						Align:  linebot.FlexComponentAlignTypeStart,
+					},
+					&linebot.TextComponent{
+						Type:   linebot.FlexComponentTypeText,
+						Margin: linebot.FlexComponentMarginTypeSm,
+						Text:   recipe.RecipeIndication,
+						Align:  linebot.FlexComponentAlignTypeEnd,
+					},
+				},
+			},
+			// 費用コンポーネント
+			&linebot.BoxComponent{
+				Type:   linebot.FlexComponentTypeBox,
+				Layout: linebot.FlexBoxLayoutTypeBaseline,
+				Contents: []linebot.FlexComponent{
+					&linebot.TextComponent{
+						Type:   linebot.FlexComponentTypeText,
+						Weight: linebot.FlexTextWeightTypeBold,
+						Margin: linebot.FlexComponentMarginTypeSm,
+						Text:   "費用",
+						Align:  linebot.FlexComponentAlignTypeStart,
+					},
+					&linebot.TextComponent{
+						Type:   linebot.FlexComponentTypeText,
+						Margin: linebot.FlexComponentMarginTypeSm,
+						Text:   recipe.RecipeCost,
+						Align:  linebot.FlexComponentAlignTypeEnd,
+					},
+				},
+			},
+			// 説明コンポーネント
+			&linebot.TextComponent{
+				Type:  linebot.FlexComponentTypeText,
+				Text:  recipe.RecipeDescription,
+				Size:  linebot.FlexTextSizeTypeXs,
+				Color: "#AAAAAA",
+				Wrap:  true,
+			},
+		},
+	}
+
+	footerComponent := &linebot.BoxComponent{
+		Type:   linebot.FlexComponentTypeBox,
+		Layout: linebot.FlexBoxLayoutTypeVertical,
+		Contents: []linebot.FlexComponent{
+			&linebot.SpacerComponent{
+				Size: linebot.FlexSpacerSizeTypeXxl,
+			},
+			&linebot.ButtonComponent{
+				Type: linebot.FlexComponentTypeButton,
+				Action: &linebot.URIAction{
+					URI:   recipe.RecipeUrl,
+					Label: "レシピを見る",
+				},
+				Color: "#0048FFFF",
+				Style: linebot.FlexButtonStyleTypePrimary,
+			},
+		},
+	}
+
+	container := &linebot.BubbleContainer{
+		Type:      linebot.FlexContainerTypeBubble,
+		Direction: linebot.FlexBubbleDirectionTypeLTR,
+		Hero:      imageComponet,
+		Body: &linebot.BoxComponent{
+			Type:   linebot.FlexComponentTypeBox,
+			Layout: linebot.FlexBoxLayoutTypeVertical,
+			Contents: []linebot.FlexComponent{
+				titleComponent,
+				contentComponent,
+			},
+		},
+		Footer: footerComponent,
+	}
+	return container
+}
+
+func GenerateRecipeCarousel(bubble []*linebot.BubbleContainer) *linebot.CarouselContainer {
+	carouselContainer := &linebot.CarouselContainer{
+		Type:     linebot.FlexContainerTypeCarousel,
+		Contents: bubble,
+	}
+	return carouselContainer
 }
 
 var Bot *linebot.Client

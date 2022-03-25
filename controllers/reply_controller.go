@@ -6,6 +6,7 @@ import (
 	"github.com/line/line-bot-sdk-go/linebot"
 	"linebot/line_utils"
 	"linebot/models"
+	"linebot/recipe"
 	"log"
 	"math"
 	"net/http"
@@ -92,6 +93,9 @@ func LineHandler(w http.ResponseWriter, r *http.Request) {
 			case "delete":
 				foodId := convertStringToUint(param["foodId"].(string))
 				replyDeleteFood(line_utils.Bot, event, foodId)
+			case "recipe":
+				foodId := convertStringToUint(param["foodId"].(string))
+				replyRecipe(line_utils.Bot, event, foodId)
 			}
 		}
 	}
@@ -132,8 +136,11 @@ func replyFoodDetail(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	var food models.Food
 	models.FindFoodByFoodId(&food, foodId)
 	replayFlex := line_utils.GenerateDetailTemplate(food)
+	if food.ID == 0 {
+		replyNotFoundMessage(bot, event)
+		return
+	}
 	_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage(food.Name, replayFlex)).Do()
-
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -142,9 +149,13 @@ func replyFoodDetail(bot *linebot.Client, event *linebot.Event, foodId uint) {
 func replyEatFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	var food models.Food
 	models.FindFoodByFoodId(&food, foodId)
+	if food.ID == 0 {
+		replyNotFoundMessage(bot, event)
+		return
+	}
 	food.Status = models.AteStatus
 	food.UpdateFood()
-	replyMessage := fmt.Sprintf("「%s」をから冷蔵庫から食べました！", food.Name)
+	replyMessage := fmt.Sprintf("「%s」をLINE冷蔵庫から食べました！", food.Name)
 	_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 
 	if err != nil {
@@ -155,6 +166,10 @@ func replyEatFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 func replyDiscardFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	var food models.Food
 	models.FindFoodByFoodId(&food, foodId)
+	if food.ID == 0 {
+		replyNotFoundMessage(bot, event)
+		return
+	}
 	food.Status = models.DiscardedStatus
 	food.UpdateFood()
 	replyMessage := fmt.Sprintf("「%s」を破棄しました、、、。", food.Name)
@@ -167,6 +182,10 @@ func replyDiscardFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 func replyDeleteFood(bot *linebot.Client, event *linebot.Event, foodId uint) {
 	var food models.Food
 	models.FindFoodByFoodId(&food, foodId)
+	if food.ID == 0 {
+		replyNotFoundMessage(bot, event)
+		return
+	}
 	food.DeleteFood()
 	replyMessage := fmt.Sprintf("「%s」を削除しました。", food.Name)
 	_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
@@ -198,10 +217,71 @@ func replyFoodsEatenRate(bot *linebot.Client, event *linebot.Event) {
 	}
 }
 
+func replyRecipe(bot *linebot.Client, event *linebot.Event, foodId uint) {
+	var food models.Food
+	models.FindFoodByFoodId(&food, foodId)
+	categoryList, fetchCategoryListErr := recipe.FetchCategoryList()
+
+	if fetchCategoryListErr != nil {
+		log.Fatalln(fetchCategoryListErr)
+	}
+
+	// TODO: add err handling
+	recipeListList, err := fetchRecipe(food.Name, categoryList)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if len(recipeListList) != 0 {
+		var recipeBublleList []*linebot.BubbleContainer
+		for _, recipe := range recipeListList[0] {
+			recipeBublleList = append(recipeBublleList, line_utils.GenerateRecipeTemplate(recipe))
+		}
+		carouselMessage := line_utils.GenerateRecipeCarousel(recipeBublleList)
+		fmt.Println(carouselMessage)
+		_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewFlexMessage(food.Name+"のレシピ", carouselMessage)).Do()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	} else {
+		bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("レシピは見つかりませんでした。")).Do()
+	}
+}
+
 func convertStringToUint(s string) uint {
 	value, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	return uint(value)
+}
+
+func replyNotFoundMessage(bot *linebot.Client, event *linebot.Event) {
+	notFoundMessage := "指定の食品は存在しません"
+	_, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(notFoundMessage)).Do()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return
+}
+
+func fetchRecipe(foodName string, categoryList []recipe.Category) ([][]recipe.Recipe, error) {
+	searchedCategoryList := recipe.SearchCategoryByFoodName(foodName, categoryList)
+	if len(searchedCategoryList) == 0 {
+		log.Println("no result")
+	}
+
+	var recipeListList [][]recipe.Recipe
+	for _, searchedCategory := range searchedCategoryList {
+		recipeList, searchRecipeErr := recipe.SearchRecipeByCategoryId(searchedCategory.CategoryId)
+		if searchRecipeErr != nil {
+			return nil, searchRecipeErr
+		}
+
+		recipeListList = append(recipeListList, recipeList)
+	}
+	fmt.Println("*************************")
+	fmt.Println(recipeListList)
+	fmt.Println("*************************")
+
+	return recipeListList, nil
 }

@@ -1,9 +1,7 @@
 package config
 
 import (
-	"gopkg.in/go-ini/ini.v1"
 	"linebot/utils"
-	"log"
 	"os"
 )
 
@@ -28,10 +26,6 @@ func init() {
 }
 
 func loadConfig() {
-	cfg, err := ini.Load("config.ini")
-	if err != nil {
-		log.Fatalln(err)
-	}
 	Config = ConfigList{
 		DbDriverName:   "postgres",
 		DbName:         os.Getenv("POSTGRES_DB"),
@@ -41,7 +35,7 @@ func loadConfig() {
 		DbPort:         "5432",
 		ServerPort:     os.Getenv("PORT"),
 		LogFile:        "webapp.log",
-		ChannelSecret:  cfg.Section("line_config").Key("channel_secret").String(),
-		ChannelToken:   cfg.Section("line_config").Key("channel_token").String(),
+		ChannelSecret:  os.Getenv("CHANNEL_SECRET"),
+		ChannelToken:   os.Getenv("CHANNEL_TOKEN"),
 	}
 }

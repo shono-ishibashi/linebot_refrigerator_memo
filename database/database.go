@@ -26,6 +26,6 @@ func init() {
 	if err != nil {
 		log.Fatalln(err)
 	} else {
-		fmt.Println("Successfully connect database")
+		log.Println("Successfully connect database")
 	}
 }
